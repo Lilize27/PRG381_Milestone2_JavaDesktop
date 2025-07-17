@@ -1,211 +1,249 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package view;
 
-/**
- *
- * @author Cosmo
- */
-public class AppointmentPanelDesign extends javax.swing.JFrame {
+import controller.AppointmentController;
+import model.Appointment;
 
-    /**
-     * Creates new form AppointmentPanelDesign
-     */
-    public AppointmentPanelDesign() {
-        initComponents();
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.event.*;
+import java.util.ArrayList;
+
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
+
+public class AppointmentPanelDesign extends JFrame {
+    private JComboBox<String> cbCounsellor;
+    private JTextField tfStudent, tfDate, tfTime;
+    private JTable table;
+    private DefaultTableModel model;
+    private AppointmentController controller = new AppointmentController();
+
+   public AppointmentPanelDesign() {
+    setTitle("Appointment Manager");
+    setSize(700, 500);
+    setDefaultCloseOperation(EXIT_ON_CLOSE);
+    setLocationRelativeTo(null);
+    setLayout(new BorderLayout(10, 10));
+
+    getContentPane().setBackground(new java.awt.Color(232, 245, 233)); // soft light green
+
+JPanel formPanel = new JPanel(new GridBagLayout());
+formPanel.setBackground(new java.awt.Color(232, 245, 233)); // match background
+
+GridBagConstraints gbc = new GridBagConstraints();
+gbc.insets = new Insets(5, 5, 5, 5);
+gbc.anchor = GridBagConstraints.WEST;
+
+
+gbc.gridx = 0; gbc.gridy = 0;
+JLabel lblStudent = new JLabel("Student:");
+lblStudent.setFont(new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 16));
+lblStudent.setForeground(new java.awt.Color(27, 94, 32)); // deep green
+formPanel.add(lblStudent, gbc);
+
+gbc.gridx = 1;
+tfStudent = new JTextField(20);
+formPanel.add(tfStudent, gbc);
+
+
+gbc.gridx = 0; gbc.gridy = 1;
+JLabel lblCounsellor = new JLabel("Counsellor:");
+lblCounsellor.setFont(new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 16));
+lblCounsellor.setForeground(new java.awt.Color(27, 94, 32));
+formPanel.add(lblCounsellor, gbc);
+
+gbc.gridx = 1;
+cbCounsellor = new JComboBox<>();
+cbCounsellor.setPreferredSize(new Dimension(200, 25));
+formPanel.add(cbCounsellor, gbc);
+
+
+gbc.gridx = 0; gbc.gridy = 2;
+JLabel lblDate = new JLabel("Date (yyyy-mm-dd):");
+lblDate.setFont(new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 16));
+lblDate.setForeground(new java.awt.Color(27, 94, 32));
+formPanel.add(lblDate, gbc);
+
+gbc.gridx = 1;
+tfDate = new JTextField(15);
+formPanel.add(tfDate, gbc);
+
+
+gbc.gridx = 0; gbc.gridy = 3;
+JLabel lblTime = new JLabel("Time (HH:MM):");
+lblTime.setFont(new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 16));
+lblTime.setForeground(new java.awt.Color(27, 94, 32));
+formPanel.add(lblTime, gbc);
+
+gbc.gridx = 1;
+tfTime = new JTextField(10);
+formPanel.add(tfTime, gbc);
+
+
+gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
+gbc.anchor = GridBagConstraints.CENTER;
+JPanel buttonPanel = new JPanel(new FlowLayout());
+buttonPanel.setBackground(new java.awt.Color(232, 245, 233)); // match background
+
+JButton btnBook = createGreenButton("Book");
+JButton btnUpdate = createGreenButton("Update");
+JButton btnCancel = createGreenButton("Cancel");
+buttonPanel.add(btnBook);
+buttonPanel.add(btnUpdate);
+buttonPanel.add(btnCancel);
+formPanel.add(buttonPanel, gbc);
+
+add(formPanel, BorderLayout.NORTH);
+
+
+model = new DefaultTableModel(new String[]{"Student", "Counsellor", "Date", "Time", "Status"}, 0);
+table = new JTable(model);
+table.setFont(new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 14));
+table.setRowHeight(25);
+JScrollPane pane = new JScrollPane(table);
+add(pane, BorderLayout.CENTER);
+
+
+JPanel navPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+navPanel.setBackground(new java.awt.Color(232, 245, 233));
+
+JButton btnDashboard = createGreenButton("Dashboard");
+JButton btnCounsellor = createGreenButton("Counsellors");
+JButton btnFeedback = createGreenButton("Feedback");
+navPanel.add(btnDashboard);
+navPanel.add(btnCounsellor);
+navPanel.add(btnFeedback);
+add(navPanel, BorderLayout.SOUTH);
+
+btnBook.addActionListener(e -> bookAppointment());
+btnCancel.addActionListener(e -> cancelAppointment());
+btnUpdate.addActionListener(e -> updateAppointment());
+
+
+btnDashboard.addActionListener(e -> {
+    DashboardDesign app = new DashboardDesign();
+    app.setVisible(true);
+    this.dispose();
+});
+
+btnCounsellor.addActionListener(e -> {
+    CounselorPanelDesign app = new CounselorPanelDesign();
+    app.setVisible(true);
+    this.dispose();
+});
+
+btnFeedback.addActionListener(e -> {
+    FeedbackPanelDesign app = new FeedbackPanelDesign();
+    app.setVisible(true);
+    this.dispose();
+});
+loadCounsellors();
+refreshTable();
+}
+   
+   private JButton createGreenButton(String text) {
+    JButton button = new JButton(text);
+    button.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 14));
+    button.setBackground(new java.awt.Color(76, 175, 80)); // standard wellness green
+    button.setForeground(java.awt.Color.WHITE);
+    button.setFocusPainted(false);
+    button.setBorderPainted(false);
+    button.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+    button.setPreferredSize(new Dimension(120, 35));
+    return button;
+}
+
+    private void loadCounsellors() {
+        for (String c : controller.getCounsellors()) {
+            cbCounsellor.addItem(c);
+        }
     }
 
-    /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
-     */
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-        jLabel1 = new javax.swing.JLabel();
-        jPanel1 = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        jSpinner1 = new javax.swing.JSpinner();
-        jLabel5 = new javax.swing.JLabel();
-        jSpinner2 = new javax.swing.JSpinner();
-        jButton1 = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
-        jLabel6 = new javax.swing.JLabel();
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel1.setText("Appointments");
-
-        jPanel1.setBackground(new java.awt.Color(204, 204, 255));
-
-        jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jLabel2.setText("Book a new appointment");
-
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        jLabel3.setText("Counselor");
-
-        jLabel4.setText("Select Date");
-
-        jLabel5.setText("Select Time");
-
-        jButton1.setText("Book");
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(14, 14, 14)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jComboBox1, 0, 220, Short.MAX_VALUE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jSpinner1)
-                            .addComponent(jLabel5)
-                            .addComponent(jSpinner2)))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(88, 88, 88)
-                        .addComponent(jButton1)))
-                .addContainerGap(19, Short.MAX_VALUE))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel3)
-                .addGap(4, 4, 4)
-                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel4)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(12, 12, 12)
-                .addComponent(jLabel5)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSpinner2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton1)
-                .addContainerGap(9, Short.MAX_VALUE))
-        );
-
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        jScrollPane1.setViewportView(jTable1);
-
-        jLabel6.setText("Appointment table");
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(20, 20, 20)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 609, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(6, 6, 6)
-                                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(15, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addComponent(jLabel1)
-                .addGap(18, 18, 18)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel6)
-                .addGap(5, 5, 5)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 224, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(AppointmentPanelDesign.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(AppointmentPanelDesign.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(AppointmentPanelDesign.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(AppointmentPanelDesign.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new AppointmentPanelDesign().setVisible(true);
-            }
+    private void refreshTable() {
+    model.setRowCount(0);
+    for (Appointment app : controller.getAppointments()) {
+        model.addRow(new Object[]{
+            app.getID(), 
+            app.getStudentName(),
+            app.getCounsellorName(),
+            app.getDate(),
+            app.getTime(),
+            app.getStatus()
         });
     }
+}
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JComboBox<String> jComboBox1;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JSpinner jSpinner1;
-    private javax.swing.JSpinner jSpinner2;
-    private javax.swing.JTable jTable1;
-    // End of variables declaration//GEN-END:variables
+    private void bookAppointment() {
+        
+        String student = tfStudent.getText().trim();
+        String counsellor = (String) cbCounsellor.getSelectedItem();
+        String date = tfDate.getText().trim();
+        String time = tfTime.getText().trim();
+
+        if (student.isEmpty() || date.isEmpty() || time.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "All fields must be filled.");
+            return;
+        }
+
+        Appointment app = new Appointment(0,student, counsellor, date, time, "Scheduled");
+        if (controller.addAppointment(app)) {
+            refreshTable();
+            JOptionPane.showMessageDialog(this, "Appointment booked.");
+        }
+    }
+
+    private void cancelAppointment() {
+    int row = table.getSelectedRow();
+    if (row >= 0) {
+        int id = (int) model.getValueAt(row, 0); 
+        int confirm = JOptionPane.showConfirmDialog(this, "Delete this Appointment?", "Confirm", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+               if (controller.deleteAppointment(id)) {
+            refreshTable();
+            JOptionPane.showMessageDialog(this, "Appointment cancelled.");
+               }
+            }
+        
+    }
+}
+
+    private void updateAppointment() {
+    int row = table.getSelectedRow();
+    if (row >= 0) {
+        int id = (int) model.getValueAt(row, 0); 
+        String student = (String) model.getValueAt(row, 1); 
+        String counsellor = (String) cbCounsellor.getSelectedItem();
+        String date = (String) model.getValueAt(row, 3);
+        String time = tfTime.getText().trim();
+
+        Appointment updated = new Appointment(id, student, counsellor, date, time, "Rescheduled");
+        if (controller.updateAppointment(updated)) {
+            refreshTable();
+            JOptionPane.showMessageDialog(this, "Appointment updated.");
+        }
+    }
+}
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {
+        DashboardDesign app = new DashboardDesign();
+        app.setVisible(true);
+        this.dispose();
+    }
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {
+        CounselorPanelDesign app = new CounselorPanelDesign();
+        app.setVisible(true);
+        this.dispose();
+    }
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {
+        FeedbackPanelDesign app = new FeedbackPanelDesign();
+        app.setVisible(true);
+        this.dispose();
+    }
+
+    public static void main(String[] args) {
+        new AppointmentPanelDesign().setVisible(true);
+    }
 }
